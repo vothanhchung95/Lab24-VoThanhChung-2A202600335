@@ -8,7 +8,7 @@
 | Tên | Module | Hoàn thành | Tests pass |
 |-----|--------|-----------|-----------|
 | Phạm Hữu Hoàng Hiệp | M1 Chunking + M5 Enrichment + Integration Lead | ☑ | 13/13 + 10/10 |
-| Trần Hữu Cường | M2 Hybrid Search (BM25 + Dense + RRF) | ☑ | 5/5 |
+| Phạm Việt Cường | M2 Hybrid Search (BM25 + Dense + RRF) | ☑ | 5/5 |
 | Lê Quang Thiên | M3 Reranking (Cross-encoder bge-reranker) | ☑ | 5/5 |
 | Võ Thanh Chung | M4 Evaluation (RAGAS + Failure Analysis) | ☑ | 4/4 |
 
