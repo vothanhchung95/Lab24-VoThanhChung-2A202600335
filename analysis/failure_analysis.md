@@ -1,118 +1,150 @@
 # Failure Analysis — Lab 18: Production RAG
 
-**Nhóm:** Nhóm 4  
+**Nhóm:** Nhóm 4
 **Thành viên:** Hiệp → M1+M5 · Cường → M2 · Thiên → M3 · Chung → M4
+**Test set:** 20 Q&A pairs tiếng Việt (4 domain: HR/IT/Finance/Legal)
 
 ---
 
-## RAGAS Scores
+## RAGAS Scores (REAL — từ `reports/ragas_report.json`)
 
 | Metric | Naive Baseline | Production | Δ |
 |--------|---------------|------------|---|
-| Faithfulness | 0.52 | 0.84 | **+0.32** |
-| Answer Relevancy | 0.58 | 0.79 | **+0.21** |
-| Context Precision | 0.61 | 0.78 | **+0.17** |
-| Context Recall | 0.67 | 0.77 | **+0.10** |
+| Faithfulness | 0.9057 | 0.7250 | **−0.18** |
+| Answer Relevancy | 0.3238 | **0.4296** | **+0.11 (+33%)** |
+| Context Precision | 0.8750 | **0.8917** | +0.02 |
+| Context Recall | 0.9500 | 0.9000 | −0.05 |
 
-> *Naive baseline: paragraph chunking + dense-only search, không LLM generation (trả về context[0] trực tiếp)*  
-> *Production: hierarchical chunking + hybrid BM25+dense + reranking + GPT-4o-mini generation*
-
----
-
-## Bottom-5 Failures
-
-### #1
-- **Question:** Tổng doanh thu và thuế GTGT hàng hóa, dịch vụ bán ra của DHA Surfaces là bao nhiêu?
-- **Expected:** 3.703.685.610 đồng Việt Nam.
-- **Got:** DHA Surfaces có doanh thu từ hoạt động kinh doanh trong kỳ báo cáo. Để biết số liệu cụ thể, vui lòng xem bảng cân đối kế toán.
-- **Worst metric:** context_recall = 0.41
-- **Error Tree:**
-  - Output đúng? → **Không** (thiếu con số cụ thể)
-  - Context đúng? → **Không** (context không chứa bảng số liệu tài chính, chỉ lấy được phần mô tả chung của BCTC)
-  - Query rewrite OK? → **Có** (câu hỏi rõ ràng, không cần rewrite)
-  - → **Fix ở bước Retrieval (R):** chunking BCTC bị cắt sai chỗ khiến bảng số liệu nằm ở parent chunk nhưng không được retrieve
-- **Root cause:** Bảng số liệu tài chính (dạng tabular data) trong BCTC.md bị hierarchical chunker tách ra khỏi header bảng. Child chunk chứa số "3.703.685.610" bị embed riêng không có context "doanh thu" → cosine similarity thấp với query.
-- **Suggested fix:** Dùng `chunk_structure_aware()` cho BCTC thay vì hierarchical — giữ nguyên header + row của bảng cùng một chunk. Hoặc thêm metadata `table_row: true` để không split giữa các dòng.
+> **Naive baseline:** paragraph chunking + dense-only search, **không LLM generation** (trả về `contexts[0]` trực tiếp làm answer)
+> **Production:** hierarchical chunking + M5 enrichment (contextual + HyQA + metadata) + hybrid BM25+dense + bge-reranker + GPT-4o-mini generation
+>
+> **Lưu ý:** Naive Faithfulness cao do answer = context literal (no paraphrase). Production LLM gen paraphrase → ragas LLM judge phát hiện diễn giải lại. Đây là artifact đo đếm, không phải production tệ hơn về chất lượng.
 
 ---
 
-### #2
-- **Question:** Chuyển dữ liệu cá nhân ra nước ngoài là gì?
-- **Expected:** Là hoạt động sử dụng không gian mạng, thiết bị, phương tiện điện tử chuyển dữ liệu cá nhân của công dân Việt Nam ra ngoài lãnh thổ Việt Nam, hoặc dùng địa điểm ngoài Việt Nam để xử lý dữ liệu cá nhân của công dân Việt Nam.
-- **Got:** Chuyển dữ liệu cá nhân ra nước ngoài là việc di chuyển thông tin cá nhân vượt ra ngoài biên giới quốc gia.
-- **Worst metric:** faithfulness = 0.48
+## Bottom-5 Failures (theo bottom-N của RAGAS, sorted by avg score)
+
+### #1 — Faithfulness sụp đổ ở câu hỏi pháp lý: Tờ khai thuế GTGT ngày ký
+- **Question:** Tờ khai thuế GTGT của DHA Surfaces được ký vào ngày nào?
+- **Expected:** Ngày 24 tháng 01 năm 2025.
+- **Got:** Tờ khai thuế GTGT của DHA Surfaces được ký vào ngày được ghi trong tài liệu.
+- **Worst metric:** **faithfulness = 0.0**
 - **Error Tree:**
-  - Output đúng? → **Không** (thiếu chi tiết pháp lý: "không gian mạng", "công dân Việt Nam")
-  - Context đúng? → **Có** (context chứa đúng Điều 26 Nghị định 13/2023)
+  - Output đúng? → **Không** (LLM trả lời chung chung, không nêu ngày cụ thể)
+  - Context đúng? → **Có** (BCTC.md chunk có chứa "Ngày 24 tháng 01 năm 2025")
   - Query rewrite OK? → **Có**
-  - → **Fix ở bước Generation (G):** LLM paraphrase mất đi ngôn ngữ pháp lý chính xác
-- **Root cause:** LLM tóm tắt quá mức (over-summarize) định nghĩa pháp lý. Prompt không yêu cầu giữ nguyên thuật ngữ chuyên ngành — LLM đơn giản hóa "không gian mạng, thiết bị điện tử" thành "biên giới quốc gia" (sai nghĩa pháp lý).
-- **Suggested fix:** Thêm vào system prompt: "Với câu hỏi định nghĩa pháp lý, trích dẫn nguyên văn thay vì paraphrase." Hoặc dùng extraction prompt thay vì summarization prompt cho domain Legal.
+  - → **Fix ở bước Generation (G):** LLM bị "context-only prompt" làm sợ → từ chối nêu ngày cụ thể dù context có
+- **Root cause:** Prompt "Trả lời CHỈ dựa trên context. Không suy đoán." khiến LLM thận trọng quá mức với nội dung BCTC (form thuế có nhiều trường rỗng [01a], [02], …) → LLM nghi ngờ và không trích xuất số liệu cụ thể, ragas judge faithfulness=0 vì answer không có content support từ context.
+- **Suggested fix:** Tăng top_k context từ 3 lên 5 để có đủ context xung quanh ngày ký + thêm vào prompt: *"Nếu context có chứa số/ngày/giá trị cụ thể, PHẢI trích xuất chính xác."*
 
 ---
 
-### #3
-- **Question:** Xử lý dữ liệu cá nhân bao gồm những hoạt động nào?
-- **Expected:** Một hoặc nhiều hoạt động tác động tới dữ liệu cá nhân như: thu thập, ghi, phân tích, xác nhận, lưu trữ, chỉnh sửa, công khai, kết hợp, truy cập, mã hóa, sao chép, chia sẻ, truyền đưa, chuyển giao, xóa, hủy.
-- **Got:** Xử lý dữ liệu cá nhân bao gồm thu thập, lưu trữ, sử dụng và xóa dữ liệu.
-- **Worst metric:** context_precision = 0.52
-- **Error Tree:**
-  - Output đúng? → **Không** (thiếu 12/16 hoạt động trong danh sách)
-  - Context đúng? → **Một phần** (context có chứa phần đầu của danh sách, nhưng reranker trả về 3 chunks trong đó 2 chunks không liên quan đến định nghĩa xử lý)
-  - Query rewrite OK? → **Có**
-  - → **Fix ở bước Reranking (R):** reranker đưa 2 chunks về chủ đề "quyền của chủ thể dữ liệu" lên top thay vì chunk chứa danh sách đầy đủ các hoạt động
-- **Root cause:** Cross-encoder reranker bị nhầm lẫn giữa "xử lý dữ liệu" (điều 2 Nghị định 13) và "quyền về dữ liệu" (điều 9) vì cùng domain. Context precision thấp → LLM chỉ generate từ context không đầy đủ.
-- **Suggested fix:** Tăng `RERANK_TOP_K` từ 3 lên 5 để giữ nhiều context hơn. Thêm metadata filter: nếu query chứa "bao gồm những" → ưu tiên chunks chứa list/enumeration.
-
----
-
-### #4
+### #2 — Faithfulness=0 trên Nghị định 13: Dữ liệu cá nhân nhạy cảm
 - **Question:** Dữ liệu cá nhân nhạy cảm bao gồm những loại nào?
-- **Expected:** Quan điểm chính trị, tôn giáo, tình trạng sức khỏe, nguồn gốc chủng tộc, di truyền, sinh học, đời sống tình dục, dữ liệu tội phạm, thông tin tài chính khách hàng, vị trí cá nhân.
-- **Got:** Dữ liệu cá nhân nhạy cảm bao gồm thông tin về sức khỏe, tôn giáo và các thông tin có thể gây hại cho cá nhân nếu bị lộ.
-- **Worst metric:** context_recall = 0.55
+- **Expected:** Quan điểm chính trị, tôn giáo, sức khỏe, nguồn gốc chủng tộc, di truyền, sinh học, đời sống tình dục, tội phạm, thông tin tài chính khách hàng, vị trí cá nhân.
+- **Got:** Dữ liệu cá nhân nhạy cảm bao gồm các thông tin liên quan đến sức khỏe, tài chính và các thông tin khác có thể ảnh hưởng đến quyền riêng tư của cá nhân.
+- **Worst metric:** **faithfulness = 0.0**
 - **Error Tree:**
-  - Output đúng? → **Không** (chỉ liệt kê 3/10 loại dữ liệu nhạy cảm)
-  - Context đúng? → **Không** (hybrid search trả về chunk nói về "dữ liệu cơ bản" thay vì chunk về "dữ liệu nhạy cảm" — 2 section liền kề trong Nghị định 13)
+  - Output đúng? → **Không** (chỉ liệt kê 2/10 loại + thêm cụm "thông tin khác" mà context không nói)
+  - Context đúng? → **Một phần** (hierarchical chunking tách Điều 2 khoản 4 thành nhiều child chunks)
   - Query rewrite OK? → **Có**
-  - → **Fix ở bước Retrieval (R):** BM25 tokenize "nhạy cảm" tốt nhưng dense search không phân biệt được "nhạy cảm" vs "cơ bản" vì 2 chunks ngữ nghĩa gần nhau
-- **Root cause:** Hierarchical chunking tách Điều 2 khoản 3 (dữ liệu nhạy cảm) thành nhiều child chunk. Child chunk đầu tiên chứa header + 3 loại đầu → được retrieve. Các loại còn lại (khoản 3d-j) nằm ở child chunk sau → bị miss.
-- **Suggested fix:** Với văn bản pháp lý có khoản/điểm, dùng `chunk_structure_aware()` split theo markdown header (`##`, `###`) thay vì hierarchical split theo độ dài. Đảm bảo mỗi "điều" là một chunk hoàn chỉnh.
+  - → **Fix ở bước Retrieval (R) + Generation (G):** chunking + LLM both contribute
+- **Root cause:** Hierarchical chunker (parent 2048 / child 256 chars) cắt danh sách 10 loại dữ liệu nhạy cảm thành nhiều child chunks. Reranker chỉ giữ top-3 → miss 6-7 loại. LLM generate dựa context không đủ → tự "thêm thắt" cụm tổng quát "thông tin khác" → faithfulness=0 do hallucination.
+- **Suggested fix:** Dùng `chunk_structure_aware()` cho Nghị định 13 — split theo markdown header `###`, giữ nguyên 1 điều/khoản = 1 chunk → 10 loại nằm trong cùng chunk.
 
 ---
 
-### #5
-- **Question:** Tờ khai thuế GTGT của DHA Surfaces áp dụng cho kỳ tính thuế nào?
-- **Expected:** Quý 4 năm 2024.
-- **Got:** Tờ khai thuế GTGT của DHA Surfaces được áp dụng cho các kỳ tính thuế theo quy định của pháp luật Việt Nam.
-- **Worst metric:** answer_relevancy = 0.38
+### #3 — Faithfulness=0: Bên Kiểm soát dữ liệu cá nhân
+- **Question:** Bên Kiểm soát dữ liệu cá nhân là gì theo Nghị định 13?
+- **Expected:** Tổ chức, cá nhân quyết định mục đích và phương tiện xử lý dữ liệu cá nhân.
+- **Got:** Bên Kiểm soát dữ liệu cá nhân là tổ chức hoặc cá nhân chịu trách nhiệm xử lý và bảo vệ dữ liệu cá nhân theo quy định của Nghị định 13.
+- **Worst metric:** **faithfulness = 0.0**
 - **Error Tree:**
-  - Output đúng? → **Không** (câu trả lời quá chung chung, không có thông tin cụ thể)
-  - Context đúng? → **Không** (search không tìm được đúng chunk chứa "Quý 4 năm 2024" trong BCTC)
-  - Query rewrite OK? → **Không** — "Tờ khai thuế GTGT" → BM25 tokenize tốt nhưng dense embedding nhầm sang chunks về quy trình nộp thuế trong IT policy
-  - → **Fix ở bước Pre-RAG (P):** query disambiguation — "DHA Surfaces" là proper noun cần metadata filter
-- **Root cause:** Dense search embed "tờ khai thuế GTGT" gần với context "IT policy" vì cả 2 đều có từ "kê khai", "hệ thống". Thiếu entity-level filter: DHA Surfaces + thuế GTGT → chỉ tìm trong BCTC.md.
-- **Suggested fix:** Thêm metadata filter theo `source_document` trong search query. Dùng NER để detect "DHA Surfaces" → restrict search về BCTC corpus. Enrichment (M5) với `extract_metadata()` đã có `entities` field — cần dùng field này trong hybrid search filter.
+  - Output đúng? → **Một phần** (LLM diễn giải lại nghĩa, không trích nguyên văn pháp lý)
+  - Context đúng? → **Có** (Điều 2 khoản 9 có đúng định nghĩa)
+  - Query rewrite OK? → **Có**
+  - → **Fix ở bước Generation (G):** over-paraphrase định nghĩa pháp lý
+- **Root cause:** LLM thay "quyết định mục đích và phương tiện" bằng "chịu trách nhiệm xử lý và bảo vệ" — semantic gần đúng nhưng diễn đạt khác. Ragas LLM judge phát hiện không có claim này trong context → faithfulness=0.
+- **Suggested fix:** Domain-aware prompt: *"Với câu hỏi định nghĩa pháp lý (chứa từ 'là gì', 'là'), TRÍCH DẪN nguyên văn từ context, không paraphrase."*
 
 ---
 
-## Case Study (cho presentation)
+### #4 — Faithfulness=0: Xử lý dữ liệu cá nhân bao gồm hoạt động nào
+- **Question:** Xử lý dữ liệu cá nhân bao gồm những hoạt động nào?
+- **Expected:** Một hoặc nhiều hoạt động: thu thập, ghi, phân tích, xác nhận, lưu trữ, chỉnh sửa, công khai, kết hợp, truy cập, mã hóa, sao chép, chia sẻ, truyền đưa, chuyển giao, xóa, hủy.
+- **Got:** Xử lý dữ liệu cá nhân bao gồm thu thập, lưu trữ, phân tích, sử dụng và bảo vệ dữ liệu cá nhân.
+- **Worst metric:** **faithfulness = 0.0**
+- **Error Tree:**
+  - Output đúng? → **Không** (chỉ 4/16 hoạt động + thêm "sử dụng", "bảo vệ" không có trong định nghĩa)
+  - Context đúng? → **Một phần** (giống #2, chunking cắt danh sách 16 hoạt động)
+  - Query rewrite OK? → **Có**
+  - → **Fix ở bước Retrieval (R):** chunking
+- **Root cause:** Tương tự #2 — danh sách 16 hoạt động bị split. LLM gen với context không đầy đủ → "tự bổ sung" hoạt động hợp lý ("sử dụng", "bảo vệ") → ragas faithfulness=0 do thông tin không có trong context.
+- **Suggested fix:** Tăng `RERANK_TOP_K` từ 3 lên 5 + structure-aware chunking để giữ list intact.
 
-**Question chọn phân tích:** *"Chuyển dữ liệu cá nhân ra nước ngoài là gì?"* (Failure #2)
+---
+
+### #5 — Faithfulness=0: Dữ liệu cá nhân cơ bản
+- **Question:** Dữ liệu cá nhân cơ bản theo Nghị định 13 gồm những thông tin gì?
+- **Expected:** Họ tên, ngày sinh, giới tính, nơi sinh, quốc tịch, hình ảnh, số điện thoại, CMND/CCCD, tình trạng hôn nhân, mối quan hệ gia đình, tài khoản số.
+- **Got:** Dữ liệu cá nhân cơ bản theo Nghị định 13 bao gồm các thông tin nhận dạng cá nhân, thông tin liên lạc và các thông tin liên quan đến danh tính của cá nhân.
+- **Worst metric:** **faithfulness = 0.0**
+- **Error Tree:**
+  - Output đúng? → **Không** (LLM tổng quát hóa "thông tin nhận dạng" thay vì liệt kê 11 trường cụ thể)
+  - Context đúng? → **Có** (Điều 2 khoản 3 trong Nghị định 13)
+  - Query rewrite OK? → **Có**
+  - → **Fix ở bước Generation (G):** abstraction-by-summarization
+- **Root cause:** Pattern "hallucination by simplification" — LLM gen ngắn gọn bằng cách tổng quát hóa danh sách dài → mất chi tiết → ragas judge "không có thông tin này trong context".
+- **Suggested fix:** Tăng `max_tokens` từ 300 → 500 + prompt enforce: *"Liệt kê đầy đủ tất cả các mục, không tổng quát hóa."*
+
+---
+
+## Pattern phân tích — 5/5 failures đều ở Faithfulness = 0
+
+**Cluster:**
+- 4/5 thuộc Legal domain (Nghị định 13)
+- 1/5 thuộc Finance domain (BCTC)
+- Tất cả là câu hỏi liệt kê/định nghĩa cần độ chính xác cao
+
+**Root cause chung:**
+1. **LLM over-paraphrase** với văn bản pháp lý/tài chính
+2. **Hierarchical chunking** cắt danh sách dài thành nhiều chunks
+3. **Reranker top-3** không đủ với câu hỏi cần list-based context
+
+**Universal fix (1 giờ):**
+1. Domain-aware prompt: trích nguyên văn cho Legal/Finance
+2. `chunk_structure_aware()` thay vì hierarchical cho Nghị định 13
+3. `RERANK_TOP_K` 3 → 5
+
+→ Dự kiến nâng Faithfulness 0.7250 → **>0.85** (đạt **bonus +5đ**).
+
+---
+
+## Case Study (cho presentation — 1 phút phần Chung)
+
+**Question:** *"Bên Kiểm soát dữ liệu cá nhân là gì theo Nghị định 13?"* (Failure #3)
 
 **Error Tree walkthrough:**
-1. **Output đúng?** → **Không** — LLM trả lời thiếu chi tiết pháp lý ("không gian mạng", "công dân Việt Nam"), dùng ngôn ngữ đời thường thay vì ngôn ngữ pháp lý
-2. **Context đúng?** → **Có** — hybrid search + reranker trả về đúng Điều 26 Nghị định 13/2023, context chứa đầy đủ định nghĩa
-3. **Query rewrite OK?** → **Có** — câu hỏi rõ ràng, không cần rewrite
-4. **Fix ở bước:** **Generation (G)** — lỗi nằm ở LLM prompt, không phải retrieval
+1. **Output đúng?** → **Không** — LLM trả "chịu trách nhiệm xử lý và bảo vệ" thay vì "quyết định mục đích và phương tiện xử lý"
+2. **Context đúng?** → **Có** — hybrid search + reranker đem về đúng Điều 2 khoản 9
+3. **Query rewrite OK?** → **Có**
+4. **Fix ở bước:** **Generation (G)**
 
-**Root cause:** Faithfulness thấp (0.48) vì LLM over-summarize định nghĩa pháp lý. Đây là điển hình của *hallucination by simplification* — LLM không bịa ra thông tin mới nhưng lại mất thông tin quan trọng trong quá trình paraphrase.
+**Root cause:** Faithfulness = 0.0 vì LLM diễn giải lại định nghĩa pháp lý theo ngôn ngữ đời thường → ragas's faithfulness judge phát hiện claim "chịu trách nhiệm xử lý và bảo vệ" không có trong context (context dùng cụm "quyết định mục đích và phương tiện").
 
-**Fix đề xuất:** Thêm instruction vào system prompt: *"Với câu hỏi về định nghĩa pháp lý hoặc quy định, hãy trích dẫn nguyên văn từ context thay vì paraphrase."* Điều này tăng Faithfulness mà không ảnh hưởng Answer Relevancy.
+**Bài học:** Đây là *hallucination by paraphrase* — LLM không bịa thông tin mới nhưng làm "trượt nghĩa" pháp lý. Khác với *hallucination by fabrication* (bịa hoàn toàn).
+
+**Fix đề xuất:** Domain-aware prompt cho Legal:
+```
+Với câu hỏi định nghĩa pháp lý (chứa "là gì", "là"),
+TRÍCH DẪN nguyên văn từ context, không paraphrase.
+```
 
 ---
 
-**Nếu có thêm 1 giờ, sẽ optimize:**
-1. **Structure-aware chunking cho văn bản pháp lý** — Nghị định 13 và BCTC đều có cấu trúc rõ (điều/khoản/điểm, bảng số liệu). Dùng `chunk_structure_aware()` thay vì hierarchical sẽ giải quyết failures #1, #3, #4.
-2. **Metadata-based filtering** — Dùng `entities` từ M5 enrichment để restrict search domain (BCTC vs HR Policy vs IT Policy vs Nghị định), giải quyết failure #5.
-3. **Legal-domain prompt** — Thêm domain-specific instruction cho câu hỏi pháp lý/tài chính: ưu tiên trích dẫn nguyên văn, giữ số liệu chính xác.
+## Nếu có thêm 1 giờ, sẽ optimize
+
+1. **Structure-aware chunking cho Legal** — Nghị định 13 có cấu trúc Chương/Điều/Khoản rõ. Dùng `chunk_structure_aware()` (Hiệp đã implement trong M1) thay vì hierarchical sẽ giải quyết 4/5 failures về Nghị định 13. Ước tính Faithfulness boost +0.15.
+2. **Domain-aware prompt** — Detect query intent (definition vs lookup vs reasoning) → dùng prompt khác nhau. Cho Legal: "trích nguyên văn". Cho HR: "trả lời ngắn gọn". → unlock bonus +5 (Faithfulness ≥ 0.85).
+3. **Async enrichment + caching** — Hiện tại 840s cho 80 chunks (sequential OpenAI calls). Dùng `asyncio.gather` với rate limiting → giảm xuống ~120s.
+4. **Metadata-based filter** — Dùng `entities` từ M5 enrichment để hạn chế domain (BCTC vs HR vs IT vs Legal) trong query → tăng Context Precision lên >0.95.

@@ -102,7 +102,15 @@ def evaluate_ragas(
             context_precision,
             context_recall,
         )
+        from ragas.llms import LangchainLLMWrapper
+        from ragas.embeddings import LangchainEmbeddingsWrapper
+        from langchain_openai import ChatOpenAI, OpenAIEmbeddings
         from datasets import Dataset
+
+        # Pass explicit wrappers — ragas 0.4.x auto-detect creates a stale embedder
+        # that lacks embed_query (incompatible with langchain-openai >= 0.2 default).
+        llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini", temperature=0))
+        embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings(model="text-embedding-3-small"))
 
         dataset = Dataset.from_dict({
             "question": questions,
@@ -113,28 +121,48 @@ def evaluate_ragas(
         result = evaluate(
             dataset,
             metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
+            llm=llm,
+            embeddings=embeddings,
         )
         df = result.to_pandas()
 
+        # ragas 0.4.x renamed columns: question→user_input, answer→response,
+        # contexts→retrieved_contexts, ground_truth→reference. Fallback to old names for safety.
+        def col(row, *candidates, default=""):
+            for c in candidates:
+                if c in row and row[c] is not None:
+                    return row[c]
+            return default
+
+        def metric(row, name, default=0.0):
+            v = row.get(name)
+            try:
+                fv = float(v)
+                # Treat NaN as 0
+                return 0.0 if fv != fv else fv
+            except (TypeError, ValueError):
+                return default
+
         per_question: list[EvalResult] = [
             EvalResult(
-                question=str(row["question"]),
-                answer=str(row["answer"]),
-                contexts=list(row["contexts"]),
-                ground_truth=str(row["ground_truth"]),
-                faithfulness=float(row.get("faithfulness") or 0.0),
-                answer_relevancy=float(row.get("answer_relevancy") or 0.0),
-                context_precision=float(row.get("context_precision") or 0.0),
-                context_recall=float(row.get("context_recall") or 0.0),
+                question=str(col(row, "user_input", "question", default=questions[i])),
+                answer=str(col(row, "response", "answer", default=answers[i])),
+                contexts=list(col(row, "retrieved_contexts", "contexts", default=contexts[i])),
+                ground_truth=str(col(row, "reference", "ground_truth", default=ground_truths[i])),
+                faithfulness=metric(row, "faithfulness"),
+                answer_relevancy=metric(row, "answer_relevancy"),
+                context_precision=metric(row, "context_precision"),
+                context_recall=metric(row, "context_recall"),
             )
-            for _, row in df.iterrows()
+            for i, (_, row) in enumerate(df.iterrows())
         ]
 
+        n = len(per_question)
         return {
-            "faithfulness": float(df["faithfulness"].mean()),
-            "answer_relevancy": float(df["answer_relevancy"].mean()),
-            "context_precision": float(df["context_precision"].mean()),
-            "context_recall": float(df["context_recall"].mean()),
+            "faithfulness": sum(r.faithfulness for r in per_question) / n if n else 0.0,
+            "answer_relevancy": sum(r.answer_relevancy for r in per_question) / n if n else 0.0,
+            "context_precision": sum(r.context_precision for r in per_question) / n if n else 0.0,
+            "context_recall": sum(r.context_recall for r in per_question) / n if n else 0.0,
             "per_question": per_question,
         }
 

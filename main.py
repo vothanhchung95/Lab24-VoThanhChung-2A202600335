@@ -9,6 +9,7 @@ Usage:
 
 import json
 import os
+import shutil
 import time
 
 
@@ -33,10 +34,10 @@ def main():
     search, reranker = build_pipeline()
     prod_results = evaluate_pipeline(search, reranker)
 
-    # Move reports to reports/
+    # Move reports to reports/ (overwrite if exists — re-runs are common)
     for f in ["ragas_report.json", "naive_baseline_report.json"]:
         if os.path.exists(f):
-            os.rename(f, f"reports/{f}")
+            shutil.move(f, f"reports/{f}")
 
     # Step 3: Comparison
     print("\n📌 STEP 3: Comparison")

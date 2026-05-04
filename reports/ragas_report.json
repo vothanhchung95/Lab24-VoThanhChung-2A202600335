@@ -1,0 +1,81 @@
+{
+  "aggregate": {
+    "faithfulness": 0.725,
+    "answer_relevancy": 0.42956591466228505,
+    "context_precision": 0.8916666665916667,
+    "context_recall": 0.9
+  },
+  "num_questions": 20,
+  "failures": [
+    {
+      "question": "Tờ khai thuế GTGT của DHA Surfaces được ký vào ngày nào?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Dữ liệu cá nhân nhạy cảm bao gồm những loại nào?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Dữ liệu cá nhân cơ bản theo Nghị định 13 gồm những thông tin gì?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Bên Kiểm soát dữ liệu cá nhân là gì theo Nghị định 13?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Xử lý dữ liệu cá nhân bao gồm những hoạt động nào?",
+      "worst_metric": "faithfulness",
+      "score": 0.0,
+      "diagnosis": "LLM hallucinating",
+      "suggested_fix": "Tighten prompt, lower temperature"
+    },
+    {
+      "question": "Tài khoản bị khóa sau bao nhiêu lần đăng nhập sai?",
+      "worst_metric": "answer_relevancy",
+      "score": 0.4343,
+      "diagnosis": "Answer doesn't match question",
+      "suggested_fix": "Improve prompt template"
+    },
+    {
+      "question": "Tờ khai thuế GTGT của DHA Surfaces áp dụng cho kỳ tính thuế nào?",
+      "worst_metric": "context_precision",
+      "score": 0.5,
+      "diagnosis": "Too many irrelevant chunks",
+      "suggested_fix": "Add reranking or metadata filter"
+    },
+    {
+      "question": "Nhân viên nữ được nghỉ thai sản bao lâu?",
+      "worst_metric": "answer_relevancy",
+      "score": 0.3491,
+      "diagnosis": "Answer doesn't match question",
+      "suggested_fix": "Improve prompt template"
+    },
+    {
+      "question": "Tổng doanh thu và thuế GTGT hàng hóa, dịch vụ bán ra của DHA Surfaces là bao nhiêu?",
+      "worst_metric": "answer_relevancy",
+      "score": 0.3589,
+      "diagnosis": "Answer doesn't match question",
+      "suggested_fix": "Improve prompt template"
+    },
+    {
+      "question": "Nghỉ phép không lương tối đa được bao nhiêu ngày mỗi năm?",
+      "worst_metric": "answer_relevancy",
+      "score": 0.4222,
+      "diagnosis": "Answer doesn't match question",
+      "suggested_fix": "Improve prompt template"
+    }
+  ]
+}
