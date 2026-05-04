@@ -1,3 +1,11 @@
+qdrant-client>=1.9.0
+sentence-transformers>=2.7.0
+FlagEmbedding>=1.2.0
+underthesea>=6.8.0
+python-dotenv>=1.0.0
+numpy>=1.24.0
+pytest>=7.0.0
+ruff>=0.1.0
 # Lab 18 - Production RAG
 # Install: pip install -r requirements.txt
 # Qdrant: docker compose up -d (see README)
