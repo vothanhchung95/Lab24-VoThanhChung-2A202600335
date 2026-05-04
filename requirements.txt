@@ -24,6 +24,7 @@ underthesea>=6.8.0
 
 # M3: rerank (CrossEncoder via sentence-transformers; Flashrank optional in code)
 flashrank>=0.2.0
+sentence-transformers>=3.0.0
 # Uncomment if using FlagReranker instead of CrossEncoder:
 # FlagEmbedding>=1.2.0
 
@@ -38,3 +39,4 @@ langchain-openai>=0.1.0
 
 # Tests
 pytest>=7.0.0
+
