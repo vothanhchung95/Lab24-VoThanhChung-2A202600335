@@ -2,11 +2,39 @@ qdrant-client>=1.9.0
 sentence-transformers>=2.7.0
 FlagEmbedding>=1.2.0
 underthesea>=6.8.0
-rank-bm25>=0.2.2
-ragas>=0.1.0
-datasets>=2.14.0
-openai>=1.0.0
 python-dotenv>=1.0.0
 numpy>=1.24.0
 pytest>=7.0.0
 ruff>=0.1.0
+# Lab 18 - Production RAG
+# Install: pip install -r requirements.txt
+# Qdrant: docker compose up -d (see README)
+
+# Config + vector DB
+python-dotenv>=1.0.0
+qdrant-client>=1.7.0
+
+# Embeddings (BAAI/bge-m3 in config) + semantic chunking
+sentence-transformers>=3.0.0
+numpy>=1.24.0
+
+# M2: BM25 + Vietnamese (assignment)
+rank-bm25>=0.2.2
+underthesea>=6.8.0
+
+# M3: rerank (CrossEncoder via sentence-transformers; Flashrank optional in code)
+flashrank>=0.2.0
+# Uncomment if using FlagReranker instead of CrossEncoder:
+# FlagEmbedding>=1.2.0
+
+# M4: RAGAS + HF datasets; OpenAI via LangChain (RAGAS docs)
+ragas>=0.1.0
+datasets>=2.14.0
+openai>=1.0.0
+langchain-core>=0.2.0
+langchain-openai>=0.1.0
+
+# M5: chunk enrichment uses OpenAI (same openai package as above)
+
+# Tests
+pytest>=7.0.0
