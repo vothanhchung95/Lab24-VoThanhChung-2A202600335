@@ -1,3 +1,82 @@
 [
-  {"question": "hihi cả nhà tự tạo testset bằng cơm nhé", "ground_truth": "Không kịp tạo luôn"},
+  {
+    "question": "Nhân viên chính thức được nghỉ phép năm bao nhiêu ngày?",
+    "ground_truth": "Nhân viên chính thức được nghỉ phép năm 12 ngày làm việc mỗi năm, tăng thêm 1 ngày cho mỗi 5 năm thâm niên."
+  },
+  {
+    "question": "Nghỉ phép không lương tối đa được bao nhiêu ngày mỗi năm?",
+    "ground_truth": "Tối đa 30 ngày mỗi năm, phải được Giám đốc bộ phận phê duyệt."
+  },
+  {
+    "question": "Nhân viên nữ được nghỉ thai sản bao lâu?",
+    "ground_truth": "6 tháng theo Luật Lao động Việt Nam, hưởng 100% lương cơ bản từ Quỹ Bảo hiểm Xã hội."
+  },
+  {
+    "question": "Phụ cấp ăn trưa cho nhân viên là bao nhiêu?",
+    "ground_truth": "50.000 VNĐ mỗi ngày làm việc."
+  },
+  {
+    "question": "Đánh giá hiệu suất nhân viên được thực hiện mấy lần một năm?",
+    "ground_truth": "2 lần mỗi năm vào tháng 6 và tháng 12, gồm 5 bậc đánh giá."
+  },
+  {
+    "question": "Mật khẩu tài khoản công ty phải thay đổi sau bao nhiêu ngày?",
+    "ground_truth": "Mỗi 90 ngày, tối thiểu 12 ký tự gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
+  },
+  {
+    "question": "Tài khoản bị khóa sau bao nhiêu lần đăng nhập sai?",
+    "ground_truth": "Sau 5 lần đăng nhập sai liên tiếp, phải liên hệ IT Helpdesk để mở khóa."
+  },
+  {
+    "question": "VPN công ty sử dụng giao thức và xác thực gì?",
+    "ground_truth": "Giao thức OpenVPN với xác thực 2 yếu tố (2FA), mỗi nhân viên kết nối tối đa 2 thiết bị cùng lúc."
+  },
+  {
+    "question": "Dung lượng hộp thư email mỗi nhân viên là bao nhiêu?",
+    "ground_truth": "50 GB. Email cũ trên 2 năm sẽ tự động lưu trữ."
+  },
+  {
+    "question": "IT Helpdesk hoạt động trong giờ nào?",
+    "ground_truth": "Từ 8:00 đến 18:00 các ngày làm việc, qua hotline 1900-xxxx hoặc email helpdesk@vinuni.edu.vn."
+  },
+  {
+    "question": "Mã số thuế của Công ty Cổ phần DHA Surfaces là gì?",
+    "ground_truth": "Mã số thuế: 0106769437."
+  },
+  {
+    "question": "Tờ khai thuế GTGT của DHA Surfaces áp dụng cho kỳ tính thuế nào?",
+    "ground_truth": "Quý 4 năm 2024."
+  },
+  {
+    "question": "Tổng doanh thu và thuế GTGT hàng hóa, dịch vụ bán ra của DHA Surfaces là bao nhiêu?",
+    "ground_truth": "3.703.685.610 đồng Việt Nam."
+  },
+  {
+    "question": "Tờ khai thuế GTGT của DHA Surfaces được ký vào ngày nào?",
+    "ground_truth": "Ngày 24 tháng 01 năm 2025."
+  },
+  {
+    "question": "Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân được ban hành ngày nào?",
+    "ground_truth": "Ngày 17 tháng 4 năm 2023, do Chính phủ ban hành theo đề nghị của Bộ trưởng Bộ Công an."
+  },
+  {
+    "question": "Dữ liệu cá nhân cơ bản theo Nghị định 13 gồm những thông tin gì?",
+    "ground_truth": "Họ tên, ngày sinh, giới tính, nơi sinh, quốc tịch, hình ảnh, số điện thoại, CMND/CCCD, tình trạng hôn nhân, mối quan hệ gia đình, tài khoản số."
+  },
+  {
+    "question": "Dữ liệu cá nhân nhạy cảm bao gồm những loại nào?",
+    "ground_truth": "Quan điểm chính trị, tôn giáo, tình trạng sức khỏe, nguồn gốc chủng tộc, di truyền, sinh học, đời sống tình dục, dữ liệu tội phạm, thông tin tài chính khách hàng, vị trí cá nhân."
+  },
+  {
+    "question": "Bên Kiểm soát dữ liệu cá nhân là gì theo Nghị định 13?",
+    "ground_truth": "Là tổ chức, cá nhân quyết định mục đích và phương tiện xử lý dữ liệu cá nhân."
+  },
+  {
+    "question": "Xử lý dữ liệu cá nhân bao gồm những hoạt động nào?",
+    "ground_truth": "Một hoặc nhiều hoạt động tác động tới dữ liệu cá nhân như: thu thập, ghi, phân tích, xác nhận, lưu trữ, chỉnh sửa, công khai, kết hợp, truy cập, mã hóa, sao chép, chia sẻ, truyền đưa, chuyển giao, xóa, hủy."
+  },
+  {
+    "question": "Chuyển dữ liệu cá nhân ra nước ngoài là gì?",
+    "ground_truth": "Là hoạt động sử dụng không gian mạng, thiết bị, phương tiện điện tử chuyển dữ liệu cá nhân của công dân Việt Nam ra ngoài lãnh thổ Việt Nam, hoặc dùng địa điểm ngoài Việt Nam để xử lý dữ liệu cá nhân của công dân Việt Nam."
+  }
 ]
