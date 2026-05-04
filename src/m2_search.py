@@ -70,7 +70,7 @@ class BM25Search:
 class DenseSearch:
     def __init__(self):
         from qdrant_client import QdrantClient
-        self.client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+        self.client = QdrantClient(":memory:")
         self._encoder = None
 
     def _get_encoder(self):
