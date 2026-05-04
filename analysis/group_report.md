@@ -1,6 +1,6 @@
 # Group Report — Lab 18: Production RAG
 
-**Nhóm:** Nhóm 4 — AICB-P2T3
+**Nhóm:** Nhóm 4 thành viên
 **Ngày:** 04/05/2026
 
 ## Thành viên & Phân công
