@@ -1,0 +1,58 @@
+name: RAGAS Eval Gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    services:
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download spaCy model
+        run: python -m spacy download en_core_web_lg
+
+      - name: Run RAGAS evaluation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python phase-a/ragas_eval.py
+
+      - name: Check eval thresholds
+        run: |
+          python - <<'EOF'
+          import csv, sys
+          rows = list(csv.DictReader(open("phase-a/ragas_results.csv")))
+          n = len(rows)
+          faith = sum(float(r["faithfulness"]) for r in rows) / n
+          rel   = sum(float(r["answer_relevancy"]) for r in rows) / n
+          prec  = sum(float(r["context_precision"]) for r in rows) / n
+          rec   = sum(float(r["context_recall"]) for r in rows) / n
+          print(f"faithfulness={faith:.4f} (min 0.70)")
+          print(f"answer_relevancy={rel:.4f} (min 0.65)")
+          print(f"context_precision={prec:.4f} (min 0.75)")
+          print(f"context_recall={rec:.4f} (min 0.75)")
+          failed = []
+          if faith < 0.70: failed.append(f"faithfulness {faith:.4f} < 0.70")
+          if rel   < 0.65: failed.append(f"answer_relevancy {rel:.4f} < 0.65")
+          if prec  < 0.75: failed.append(f"context_precision {prec:.4f} < 0.75")
+          if rec   < 0.75: failed.append(f"context_recall {rec:.4f} < 0.75")
+          if failed:
+              print("EVAL GATE FAILED:", failed)
+              sys.exit(1)
+          print("All thresholds passed.")
+          EOF

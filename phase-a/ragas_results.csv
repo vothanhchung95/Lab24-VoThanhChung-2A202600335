@@ -1,0 +1,51 @@
+id,question,faithfulness,answer_relevancy,context_precision,context_recall,avg_score,type,domain
+1,Nhân viên chính thức được nghỉ phép năm bao nhiêu ngày?,0.7034,0.4089,0.8828,0.9491,0.736,simple,HR
+2,Nghỉ phép không lương tối đa được bao nhiêu ngày mỗi năm?,0.7059,0.2499,0.9183,0.8813,0.6888,simple,HR
+3,Nhân viên nữ được nghỉ thai sản bao lâu?,0.6925,0.4435,0.9103,0.9814,0.7569,simple,HR
+4,Phụ cấp ăn trưa cho nhân viên là bao nhiêu?,0.8235,0.4429,0.8326,0.829,0.732,simple,HR
+5,Đánh giá hiệu suất nhân viên được thực hiện mấy lần một năm?,0.762,0.5869,0.895,0.8926,0.7841,simple,HR
+6,Khi nhân viên nghỉ ốm dài hạn trên 14 ngày liên tục quyền lợi bảo hiểm áp dụng như thế nào?,0.8048,0.2552,0.8667,0.9343,0.7152,multi_context,HR
+7,Nhân viên nam có vợ sinh con được nghỉ bao nhiêu ngày?,0.856,0.4007,0.9218,0.9174,0.774,simple,HR
+8,Để bảo mật tài khoản và email công ty nhân viên cần tuân thủ những quy định nào?,0.8423,0.296,0.9372,0.794,0.7174,multi_context,IT
+9,Chủ thể dữ liệu có quyền gì khi muốn hạn chế hoặc xóa dữ liệu cá nhân và thời hạn thực hiện là bao nhiêu?,0.082,0.3568,0.8184,0.9613,0.5546,multi_context,Legal
+10,Nhân viên mới cần biết gì về chính sách IT khi bắt đầu làm việc?,0.8246,0.2833,0.9595,0.8298,0.7243,multi_context,IT
+11,Mật khẩu tài khoản công ty phải thay đổi sau bao nhiêu ngày?,0.7121,0.3943,0.9009,0.9573,0.7411,simple,IT
+12,Tài khoản bị khóa sau bao nhiêu lần đăng nhập sai?,0.8208,0.4716,0.9437,0.9335,0.7924,simple,IT
+13,VPN công ty sử dụng giao thức và xác thực gì?,0.631,0.3435,0.8541,0.935,0.6909,simple,IT
+14,Dung lượng hộp thư email mỗi nhân viên là bao nhiêu?,0.6875,0.7099,0.8262,0.8231,0.7617,simple,IT
+15,IT Helpdesk hoạt động trong giờ nào?,0.8403,0.6002,0.9322,0.9585,0.8328,simple,IT
+16,Dữ liệu công việc của nhân viên phải lưu trữ ở đâu?,0.939,0.4183,0.7779,0.8628,0.7495,simple,IT
+17,Thời gian phản hồi sự cố nghiêm trọng P1 của IT Helpdesk là bao nhiêu?,0.8679,0.2564,0.8944,0.9177,0.7341,simple,IT
+18,Lịch backup hệ thống chính được thực hiện vào lúc nào?,0.6777,0.5164,0.9382,1.0,0.7831,simple,IT
+19,Mã số thuế của Công ty Cổ phần DHA Surfaces là gì?,0.818,0.2065,0.8468,0.8418,0.6783,simple,Finance
+20,Tờ khai thuế GTGT của DHA Surfaces áp dụng cho kỳ tính thuế nào?,0.8678,0.2116,0.8861,0.9525,0.7295,simple,Finance
+21,Tổng doanh thu và thuế GTGT hàng hóa dịch vụ bán ra của DHA Surfaces là bao nhiêu?,0.6165,0.2444,0.7444,0.8242,0.6074,simple,Finance
+22,Tờ khai thuế GTGT của DHA Surfaces được ký vào ngày nào?,0.6398,0.3295,0.9872,0.8987,0.7138,simple,Finance
+23,Người ký tờ khai thuế GTGT của DHA Surfaces là ai?,0.7642,0.2998,0.9785,0.9625,0.7512,simple,Finance
+24,Thuế GTGT phải nộp ngân sách nhà nước trong kỳ của DHA Surfaces là bao nhiêu?,0.7661,0.1583,0.964,0.9267,0.7037,simple,Finance
+25,Bên Xử lý dữ liệu cá nhân là gì theo Nghị định 13?,0.659,0.426,1.0,0.8749,0.74,simple,Legal
+26,Nghị định 13 áp dụng đối với những đối tượng nào?,0.714,0.4434,0.8504,0.821,0.7072,simple,Legal
+27,Bên Kiểm soát dữ liệu cá nhân là gì theo Nghị định 13?,0.4523,0.6004,0.957,0.9482,0.7395,simple,Legal
+28,Dữ liệu cá nhân cơ bản theo Nghị định 13 gồm những thông tin gì?,0.1186,0.5149,0.9362,0.8615,0.6078,simple,Legal
+29,Dữ liệu cá nhân nhạy cảm bao gồm những loại nào?,0.3809,0.4293,1.0,0.8261,0.6591,simple,Legal
+30,Chuyển dữ liệu cá nhân ra nước ngoài là gì?,0.4108,0.593,0.856,0.8745,0.6836,simple,Legal
+31,Nếu nhân viên đã làm việc 10 năm họ được nghỉ phép bao nhiêu ngày mỗi năm?,0.7397,0.2806,0.9093,0.8153,0.6862,reasoning,HR
+32,Nếu nhân viên bị ốm 40 ngày liên tục chế độ áp dụng là gì?,0.8578,0.43,1.0,0.9197,0.8019,reasoning,HR
+33,So sánh nghĩa vụ của Bên Kiểm soát dữ liệu và Bên Xử lý dữ liệu cá nhân theo Nghị định 13?,0.6799,0.2732,0.8819,0.9226,0.6894,multi_context,Legal
+34,Nhân viên cần thực hiện gì khi laptop công ty bị mất?,0.9869,0.2279,0.9709,0.9414,0.7818,reasoning,IT
+35,Những hành vi nào bị cấm khi sử dụng email công ty?,0.955,0.5151,0.8959,0.8635,0.8074,reasoning,IT
+36,Mật khẩu phải đáp ứng những yêu cầu gì theo chính sách IT?,0.5378,0.4531,0.8764,1.0,0.7168,reasoning,IT
+37,DHA Surfaces có phải nộp thêm thuế GTGT trong kỳ không và số tiền là bao nhiêu?,0.6333,0.318,0.7662,0.8723,0.6475,reasoning,Finance
+38,Thuế GTGT được khấu trừ từ các kỳ trước của DHA Surfaces là bao nhiêu?,0.7642,0.3785,1.0,0.8969,0.7599,reasoning,Finance
+39,Dữ liệu cá nhân nhạy cảm có yêu cầu xử lý đặc biệt gì so với dữ liệu cơ bản?,0.3074,0.4845,0.9331,0.9344,0.6649,reasoning,Legal
+40,Trong trường hợp nào có thể xử lý dữ liệu cá nhân mà không cần sự đồng ý của chủ thể?,0.37,0.5656,0.8987,0.949,0.6958,reasoning,Legal
+41,Bên Kiểm soát và xử lý dữ liệu cá nhân khác gì với Bên Kiểm soát và Bên Xử lý riêng lẻ?,0.6661,0.5027,0.9146,1.0,0.7709,reasoning,Legal
+42,Chủ thể dữ liệu có bao nhiêu quyền và quyền nào cho phép xóa dữ liệu?,0.5116,0.3941,0.9007,1.0,0.7016,reasoning,Legal
+43,Tăng lương nhân viên dựa trên điều gì và mức tối đa là bao nhiêu?,0.7428,0.4919,0.9874,0.8641,0.7715,reasoning,HR
+44,Nhân viên mới sau khi ký hợp đồng chính thức được hưởng những phúc lợi gì?,0.466,0.4655,0.9101,0.8574,0.6748,multi_context,HR
+45,So sánh tất cả các loại nghỉ phép và thời gian tối đa mỗi loại theo chính sách HR.,0.8557,0.5025,0.8121,0.9363,0.7766,multi_context,HR
+46,Nhân viên làm việc từ xa cần tuân thủ những quy định IT gì?,0.6956,0.2516,0.9279,0.8968,0.693,multi_context,IT
+47,Nếu một thiết bị công ty bị đánh cắp những bước xử lý theo chính sách IT là gì?,0.6132,0.4924,0.9307,0.8596,0.724,multi_context,IT
+48,Lương và các thành phần phụ cấp của nhân viên VinUni gồm những gì?,0.7851,0.5514,0.8347,0.9267,0.7745,multi_context,HR
+49,Quy trình đồng ý xử lý dữ liệu cá nhân theo Nghị định 13 bao gồm những yêu cầu gì?,0.4754,0.7015,0.7427,0.9487,0.7171,multi_context,Legal
+50,Nếu nhân viên muốn xóa dữ liệu cá nhân điều kiện và thời hạn là gì?,0.4291,0.4176,1.0,0.8994,0.6865,multi_context,Legal

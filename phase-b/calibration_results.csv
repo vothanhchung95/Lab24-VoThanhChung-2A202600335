@@ -1,0 +1,11 @@
+id,question,human_winner,llm_winner,human_accuracy_a,human_accuracy_b,llm_accuracy_a,llm_accuracy_b,agree
+1,Nhân viên chính thức được nghỉ phép năm bao nhiêu ngày?,A,A,5,3,5,3,1
+2,Nhân viên nam có vợ sinh con được nghỉ bao nhiêu ngày?,A,A,5,3,4,3,1
+3,Mật khẩu tài khoản công ty phải thay đổi sau bao nhiêu ngày?,A,A,4,3,4,3,1
+4,Dữ liệu công việc phải lưu trữ ở đâu?,A,A,5,3,5,3,1
+5,Tờ khai thuế GTGT của DHA Surfaces được ký vào ngày nào?,B,B,3,4,3,4,1
+6,Thuế GTGT phải nộp ngân sách trong kỳ là bao nhiêu?,A,A,5,3,5,3,1
+7,Bên Kiểm soát dữ liệu cá nhân là gì?,A,A,4,3,4,3,1
+8,Dữ liệu cá nhân nhạy cảm bao gồm những loại nào?,tie,A,4,4,4,3,0
+9,Trong trường hợp nào có thể xử lý dữ liệu mà không cần đồng ý?,A,tie,4,4,4,4,0
+10,So sánh các loại nghỉ phép và thời gian tối đa mỗi loại?,A,A,5,3,5,3,1

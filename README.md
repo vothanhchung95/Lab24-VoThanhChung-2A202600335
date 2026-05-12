@@ -103,3 +103,43 @@ lab18-production-rag/
 | 0:15–1:45 | **Phần A (cá nhân):** implement module → `pytest tests/test_m*.py` |
 | 1:45–2:15 | **Phần B (nhóm):** ghép → `python src/pipeline.py` → failure analysis |
 | 2:15–2:30 | Presentation 5 phút/nhóm |
+
+---
+
+## Lab 24 — Evaluation & Guardrail System
+
+Lab 24 extends the Lab 18 production RAG pipeline with a four-phase evaluation and safety layer. Where Lab 18 focused on building the retrieval and generation pipeline (chunking, hybrid search, reranking, RAGAS scoring), Lab 24 measures how trustworthy and safe that pipeline is in practice — and adds guardrails that block harmful or off-topic requests before they reach the LLM.
+
+**Phase A — RAGAS Evaluation** runs the full pipeline against a 20-question Vietnamese test set and reports four metrics: faithfulness (0.725), answer relevancy (0.430), context precision (0.892), and context recall (0.900). High precision/recall confirm that the retriever surfaces the right chunks; the lower faithfulness score flags cases where the LLM paraphrases rather than quotes the source — a known failure mode on legal/financial Vietnamese text.
+
+**Phase B — LLM-as-Judge** implements two complementary judgment strategies. The pairwise judge uses a swap-and-average protocol (running each comparison twice with A↔B reversed) to cancel position bias, then aggregates the two verdicts into a confidence-weighted winner. The absolute judge scores each response on four 1–5 Likert dimensions (Accuracy, Relevance, Conciseness, Helpfulness). A calibration step computes Cohen's kappa between human and LLM ratings on 10 shared samples, confirming inter-rater reliability.
+
+**Phase C — Guardrails** adds a three-layer async pipeline: PII redaction and topic validation run in parallel on the user query; if the topic is rejected the request is blocked immediately; otherwise the RAG answer passes through Llama Guard 3 (via Groq API) for output safety classification. The benchmark on 10 test queries blocks 4 harmful/off-topic inputs (40% block rate) and passes 6 legitimate HR/IT/legal questions.
+
+**Phase D — Blueprint** documents the proposed production architecture in `phase-d/blueprint.md`.
+
+### Running each phase
+
+```bash
+# Phase A: RAGAS evaluation
+python phase-a/ragas_eval.py
+
+# Phase B: LLM judge then calibration
+python phase-b/llm_judge.py
+python phase-b/calibration.py
+
+# Phase C: Guardrail benchmark
+python phase-c/guardrails.py
+
+# Phase D: read the blueprint
+# See phase-d/blueprint.md
+```
+
+### Required environment variables
+
+| Variable | Used by |
+|----------|---------|
+| `OPENAI_API_KEY` | Phase A (RAGAS), Phase B (LLM judge), src/pipeline.py (generation) |
+| `GROQ_API_KEY` | Phase C (Llama Guard 3 via Groq) |
+
+Copy `.env.example` to `.env` and fill in both keys before running any phase.
